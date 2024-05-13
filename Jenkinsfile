@@ -12,7 +12,6 @@ pipeline {
             IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
             IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
- 
     stages{
         stage("Cleanup Workspace"){
                 steps {
@@ -22,7 +21,7 @@ pipeline {
 
         stage("Checkout from SCM"){
                 steps {
-                    git branch: 'main', credentialsId: 'github', url: 'https://github.com/venkatravi26071994/register-app'
+                    git branch: 'main', credentialsId: 'github', url: 'https://github.com/Ashfaque-9x/register-app'
                 }
         }
 
@@ -36,9 +35,8 @@ pipeline {
        stage("Test Application"){
            steps {
                  sh "mvn test"
-
            }
-       }  
+       }
 
        stage("SonarQube Analysis"){
            steps {
@@ -75,6 +73,12 @@ pipeline {
 
        }
 
-    }
+       stage("Trivy Scan") {
+           steps {
+               script {
+	            sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image venkatravi26071994/register-app-pipeline:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table')
+               }
+           }
+       }
+   }
 }
-
